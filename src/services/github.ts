@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import core from "@actions/core";
-const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
+const GITHUB_TOKEN: string = core.getInput("github_token");
 
 const octokit = new Octokit({
   auth: GITHUB_TOKEN,

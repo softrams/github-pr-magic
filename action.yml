@@ -2,10 +2,10 @@ name: 'Github PR Magic'
 description: 'Automatically reviewing and approving PRs'
 author: 'Darrell Richards'
 inputs:
-  github-token:
+  github_token:
     description: 'Github token'
     required: true
-  pr-number:
+  pr_number:
     description: 'PR number'
     required: true
   openai_api_key:

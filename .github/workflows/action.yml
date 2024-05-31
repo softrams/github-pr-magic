@@ -20,7 +20,7 @@ jobs:
           - name: Run Custom Action
             uses: ./
             with:
-              github-token: ${{ secrets.GITHUB_TOKEN }}
+              github_token: ${{ secrets.GITHUB_TOKEN }}
               pr-number: ${{ github.event.number }}
               openai_api_key: ${{ secrets.OPENAI_API_KEY }}
               openai_model: 'gpt-4'
