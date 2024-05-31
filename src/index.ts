@@ -15,7 +15,7 @@ async function main() {
 
     if (action === "opened") {
         // Generate a summary of the PR since it's a new PR
-        
+        console.log('Generating summary for new PR');
     }
 
     if (!dif) {
