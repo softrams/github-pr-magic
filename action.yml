@@ -1,0 +1,24 @@
+name: 'Github PR Magic'
+description: 'Automatically reviewing and approving PRs'
+author: 'Darrell Richards'
+inputs:
+  github-token:
+    description: 'Github token'
+    required: true
+  pr-number:
+    description: 'PR number'
+    required: true
+  openai_api_key:
+    description: 'OpenAI API key'
+    required: true
+  openai_model:
+    description: 'OpenAI model to use (e.g., gpt-4, davinci)'
+    required: false
+    default: 'gpt-4'
+  review_code:
+    description: 'Review code'
+    required: false
+    default: true
+runs:
+  using: 'node20'
+  main: 'lib/index.js'

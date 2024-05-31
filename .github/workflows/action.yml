@@ -1,0 +1,22 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+    ai_code_review:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+          - name: Set up Node
+            uses: actions/setup-node@v2
+          - name: Run Custom Action
+            uses: ./
+            with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              pr-number: ${{ github.event.number }}
+              openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+              openai_model: 'gpt-4'
+              review_code: true
