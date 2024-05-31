@@ -25,3 +25,4 @@ jobs:
               openai_api_key: ${{ secrets.OPENAI_API_KEY }}
               openai_model: 'gpt-4'
               review_code: true
+              expluded_files: 'node_modules'

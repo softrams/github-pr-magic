@@ -1,12 +1,13 @@
 const parser = require('@tandil/diffparse');
 import { readFileSync } from "fs"
 import OpenAI from "openai"
-import core from "@actions/core";
+import * as core from "@actions/core"
+
 import { PRDetails } from "./services/github";
 import { minimatch } from "minimatch";
 
 const openai = new OpenAI()
-const excludedFiles = core.getInput("exclude").split(",").map((s: string) => s.trim());
+const excludedFiles = core.getInput("expluded_files").split(",").map((s: string) => s.trim());
 
 async function main() {
     let dif: string | null = null;

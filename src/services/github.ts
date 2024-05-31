@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import core from "@actions/core";
+import * as core from "@actions/core"
 const GITHUB_TOKEN: string = core.getInput("github_token");
 
 const octokit = new Octokit({
