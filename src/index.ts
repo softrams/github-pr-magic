@@ -18,8 +18,8 @@ async function main() {
     console.log(`PR Action: ${action}`);
     console.log(`PR Number: ${number}`);
     const data = await gitDiff(repository.owner.login, repository.name, number);
-        // diff = data.body;
-        console.log('data', data)
+        dif = data as unknown as string;
+        // console.log('data', data)
     // if (action === "opened") {
     //     // Generate a summary of the PR since it's a new PR
     //     console.log('Generating summary for new PR');
@@ -41,7 +41,7 @@ async function main() {
         );
     });
 
-    console.log(filteredDiff);
+    console.log('filteredDiff', filteredDiff);
 
     // Validate Some Code Yo!
 
