@@ -2,7 +2,7 @@ const parser = require('@tandil/diffparse');
 import { readFileSync } from "fs"
 import OpenAI from "openai"
 import core from "@actions/core";
-import { PRDetails } from "./lib/github";
+import { PRDetails } from "./services/github";
 import { minimatch } from "minimatch";
 
 const openai = new OpenAI()
