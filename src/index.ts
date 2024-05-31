@@ -35,7 +35,7 @@ async function main() {
     }
 
     const diff = parser.parseDiffString(dif);
-    const filteredDiff = diff.filter((file: { to: any; }) => {
+    const filteredDiff = diff.files.filter((file: { to: any; }) => {
         return !excludedFiles.some((pattern) =>
           minimatch(file.to ?? "", pattern)
         );
