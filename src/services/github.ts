@@ -58,6 +58,6 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
 
 
 
-    console.log('createReviewComment error', newError);
+    console.log('createReviewComment error', newError.errors);
   }
 }
