@@ -15,6 +15,8 @@ export async function PRDetails(repository: any, number: number) {
     pull_number: number,
   });
 
+  console.log('patchUrl', data.patch_url)
+
   return {
     title: data.title || "",
     description: data.body || "",
