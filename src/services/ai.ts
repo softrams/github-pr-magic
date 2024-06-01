@@ -57,7 +57,8 @@ export async function validateCodeViaAI(file: File, chunk: Chunk, details: Detai
         });
 
 
-        console.log('response', response);
+        const resss = response.choices[0].message?.content?.trim() || "{}";
+        console.log('resss', JSON.parse(resss).reviews);
     } catch (error) {
         console.log('validateCodeViaAI error', error)
     }
