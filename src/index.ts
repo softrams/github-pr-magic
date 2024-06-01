@@ -5,7 +5,7 @@ import parseDiff, { File } from "parse-diff"
 import * as core from "@actions/core"
 
 import { createReviewComment, gitDiff, PRDetails } from "./services/github";
-import { minimatch } from "minimatch";
+import { filter, minimatch } from "minimatch";
 import { prSummaryCreation, validateCodeViaAI } from "./services/ai";
 
 
@@ -22,36 +22,38 @@ async function validateCode(diff: File[], details: Details) {
 
     for (const file of diff) {
         for (const chunk of file.chunks) {
-            const results = await validateCodeViaAI(file, chunk, details);
+            const message = await prSummaryCreation(file.to ?? "", details.title);
+            console.log('message', message);
+            // const results = await validateCodeViaAI(file, chunk, details);
 
-            if (results) {
-                const mappedResults = results.flatMap((result: any) => {
-                    if (!file.to) {
-                        return [];
-                    }
+            // if (results) {
+            //     const mappedResults = results.flatMap((result: any) => {
+            //         if (!file.to) {
+            //             return [];
+            //         }
 
-                    if (!result.lineNumber) {
-                        return [];
-                    }
+            //         if (!result.lineNumber) {
+            //             return [];
+            //         }
 
-                    if (!result.review) { 
-                        return [];
-                    }
+            //         if (!result.review) { 
+            //             return [];
+            //         }
 
-                    return {
-                        body: result.review,
-                        path: file.to,
-                        position: Number(result.lineNumber),
-                    };
-                });
+            //         return {
+            //             body: result.review,
+            //             path: file.to,
+            //             position: Number(result.lineNumber),
+            //         };
+            //     });
 
-                if (mappedResults) {
-                    neededComments.push(...mappedResults);
-                }
-            }
+            //     if (mappedResults) {
+            //         neededComments.push(...mappedResults);
+            //     }
+            // }
         }
     }
-    return neededComments;
+    return [];
 }
 
 
@@ -84,12 +86,10 @@ async function main() {
         );
     });
 
-    await prSummaryCreation(patch_url, title);
-
-    // const neededComments = await validateCode(filteredDiff, {
-    //     title,
-    //     description
-    // });
+    const neededComments = await validateCode(filteredDiff, {
+        title,
+        description
+    });
 
     // console.log('neededComments', neededComments);
     // if (neededComments && neededComments.length > 0) {

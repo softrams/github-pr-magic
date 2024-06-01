@@ -40,7 +40,7 @@ export async function createMessage(file: File, chunk: Chunk, details: Details) 
     return message;
 }
 
-export async function prSummaryCreation(diff_url: string, title: string) {
+export async function prSummaryCreation(file: File[], title: string) {
     const message = `
         Your requirement is to create a Pull Request Summary for this Pull Request.
         Instructions below:
@@ -49,9 +49,10 @@ export async function prSummaryCreation(diff_url: string, title: string) {
          - Provide the written summary in the following JSON format: {"What is changing?": "<What is changing>", "Why is this change needed?": "<Why is this change needed?>", "Anything Else?": "<Anything Else?>"}.
          
         
-        Review the following code diff in the file "${diff_url}" and take the pull request title: "${title}" into account when writing your response.
+        Review the following code diff in the file "${file}" and take the pull request title: "${title}" into account when writing your response.
 
-        Git diff to review: "${diff_url}"
+        Git diff to review:
+        ${file.map((f) => f.chunks.map((c) => c.content).join("\n")).join("\n")}
     `
 
     const response = await openai.chat.completions.create({
