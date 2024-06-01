@@ -22,7 +22,7 @@ jobs:
             with:
               github_token: ${{ secrets.GITHUB_TOKEN }}
               pr-number: ${{ github.event.number }}
-              openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+              openai_api_key: ${{ secrets.OPEN_AI_KEY }}
               openai_model: 'gpt-4'
               review_code: true
               expluded_files: 'node_modules'
