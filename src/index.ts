@@ -21,7 +21,8 @@ async function validateCode(diff: File[], details: Details) {
     const neededComments = [];
     for (const file of diff) {
         for (const chunk of file.chunks) {
-            
+            const message = await prSummaryCreation(file, chunk, details);
+            console.log('message', message);
             // const results = await validateCodeViaAI(file, chunk, details);
 
             // if (results) {
@@ -92,8 +93,7 @@ async function main() {
     //     description
     // });
 
-    const message = await prSummaryCreation(diff_url, patch_url, title);
-    console.log('message', message);
+    
     // console.log('neededComments', neededComments);
     // if (neededComments && neededComments.length > 0) {
     //     await createReviewComment(repository.owner.login, repository.name, number, neededComments);
