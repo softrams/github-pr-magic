@@ -39,11 +39,15 @@ export async function gitDiff(owner: string, repo: string, pull_number: number) 
 
 export async function createReviewComment(owner: string, repo: string, pull_number: number, comments: any[]) {
   // Create a review comment
-  return await octokit.pulls.createReview({
-    owner,
-    repo,
-    pull_number,
-    event: "REQUEST_CHANGES",
-    comments,
-  }); 
+  try {
+    await octokit.pulls.createReview({
+      owner,
+      repo,
+      pull_number,
+      event: "REQUEST_CHANGES",
+      comments,
+    }); 
+  } catch (error) {
+    console.log('createReviewComment error', error);
+  }
 }
