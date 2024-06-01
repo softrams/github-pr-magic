@@ -58,7 +58,7 @@ async function validateCode(diff: File[], details: Details) {
 async function main() {
     let dif: string | null = null;
     const { action, repository, number } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
-    const { title, description, diff_url } = await PRDetails(repository, number);
+    const { title, description, patch_url } = await PRDetails(repository, number);
 
     const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
@@ -84,7 +84,7 @@ async function main() {
         );
     });
 
-    await prSummaryCreation(diff_url, title);
+    await prSummaryCreation(patch_url, title);
 
     // const neededComments = await validateCode(filteredDiff, {
     //     title,

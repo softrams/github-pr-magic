@@ -19,7 +19,7 @@ export async function PRDetails(repository: any, number: number) {
   return {
     title: data.title || "",
     description: data.body || "",
-    diff_url: data.diff_url || "",
+    patch_url: data.patch_url || "",
   };
 }
 
