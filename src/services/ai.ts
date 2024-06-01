@@ -88,9 +88,9 @@ export async function summaryAllMessages(summaries: any[]) {
         Instructions below:
          - Provide a detailed summary of all the pull request summaries.
          - Provide the written summary in the following JSON format: {"summary": "<summary>", "changes": "<changes>", "typeChanges": "<typeChanges", "checklist": "<checklist>"}.
-         - Please write the result in Github Markdown Format.
+         - Please write the result in Markdown Format.
 
-         
+
         Summaries to review: ${summaries.map((s) => s.changes).join(", ")}
     `
 
