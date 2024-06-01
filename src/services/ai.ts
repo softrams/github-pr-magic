@@ -77,7 +77,9 @@ export async function prSummaryCreation(file: File, chunk: Chunk, details: Detai
         ],
     });
 
-    return JSON.parse(response.choices[0].message?.content?.trim() || "{}").summary;   
+    const resss = response.choices[0].message?.content?.trim() || "{}";
+    console.log('resss', JSON.parse(resss));
+    return JSON.parse(resss).summary; 
 }
 
 
