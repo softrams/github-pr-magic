@@ -30,6 +30,10 @@ async function validateCode(diff: File[], details: Details) {
                         return [];
                     }
 
+                    if (!result.lineNumber) {
+                        return [];
+                    }
+
                     return {
                         body: result.review,
                         path: file.to,
