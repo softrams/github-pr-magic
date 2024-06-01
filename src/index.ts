@@ -9,6 +9,36 @@ import { minimatch } from "minimatch";
 // const openai = new OpenAI()
 const excludedFiles = core.getInput("expluded_files").split(",").map((s: string) => s.trim());
 
+
+async function validateCode(diff: any[]) {
+    const neededComments = [];
+
+    for (const file of diff) {
+        console.log('file', file);
+        for (const chunk of file.chunks) {
+            const message = "Remove console.log statements";
+        }
+        // const comments = [];
+        // for (const chunk of file.chunks) {
+        //     const lines = chunk.changes.map((change: Change) => change.content);
+        //     const code = lines.join("\n");
+        //     if (code.includes("console.log")) {
+        //         comments.push({
+        //             line: chunk.content[0].lineNumber,
+        //             message: "Remove console.log statements",
+        //         });
+        //     }
+        // }
+        // if (comments.length > 0) {
+        //     neededComments.push({
+        //         file: file.to,
+        //         comments,
+        //     });
+        // }
+    }
+}
+
+
 async function main() {
     let dif: string | null = null;
     const { action, repository, number } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
@@ -42,6 +72,7 @@ async function main() {
     });
 
     console.log('filteredDiff', filteredDiff);
+    validateCode(filteredDiff)
 
     // Validate Some Code Yo!
 
