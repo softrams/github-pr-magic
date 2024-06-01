@@ -19,9 +19,6 @@ export interface Details {
 
 async function validateCode(diff: File[], details: Details) {
     const neededComments = [];
-
-    const message = await prSummaryCreation(diff, details.title);
-    console.log('message', message);
     for (const file of diff) {
         for (const chunk of file.chunks) {
             
@@ -64,7 +61,7 @@ async function validateCode(diff: File[], details: Details) {
 async function main() {
     let dif: string | null = null;
     const { action, repository, number } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
-    const { title, description, patch_url } = await PRDetails(repository, number);
+    const { title, description, patch_url, diff_url } = await PRDetails(repository, number);
 
     const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
@@ -90,11 +87,13 @@ async function main() {
         );
     });
 
-    const neededComments = await validateCode(filteredDiff, {
-        title,
-        description
-    });
+    // const neededComments = await validateCode(filteredDiff, {
+    //     title,
+    //     description
+    // });
 
+    const message = await prSummaryCreation(diff_url, patch_url, title);
+    console.log('message', message);
     // console.log('neededComments', neededComments);
     // if (neededComments && neededComments.length > 0) {
     //     await createReviewComment(repository.owner.login, repository.name, number, neededComments);

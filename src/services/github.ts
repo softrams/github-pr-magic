@@ -22,6 +22,7 @@ export async function PRDetails(repository: any, number: number) {
     title: data.title || "",
     description: data.body || "",
     patch_url: data.patch_url || "",
+    diff_url: data.diff_url || "",
   };
 }
 
