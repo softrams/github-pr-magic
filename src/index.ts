@@ -19,42 +19,40 @@ export interface Details {
 
 async function validateCode(diff: File[], details: Details) {
     const neededComments = [];
-
-    const message = await prSummaryCreation(diff, details.title);
-        console.log('message', message);
-    // for (const file of diff) {
-        
-    //     for (const chunk of file.chunks) {
+    for (const file of diff) {
+        const message = await prSummaryCreation(file, details.title);
+        console.log('message', message);  
+        for (const chunk of file.chunks) {
             
-    //         // const results = await validateCodeViaAI(file, chunk, details);
+            // const results = await validateCodeViaAI(file, chunk, details);
 
-    //         // if (results) {
-    //         //     const mappedResults = results.flatMap((result: any) => {
-    //         //         if (!file.to) {
-    //         //             return [];
-    //         //         }
+            // if (results) {
+            //     const mappedResults = results.flatMap((result: any) => {
+            //         if (!file.to) {
+            //             return [];
+            //         }
 
-    //         //         if (!result.lineNumber) {
-    //         //             return [];
-    //         //         }
+            //         if (!result.lineNumber) {
+            //             return [];
+            //         }
 
-    //         //         if (!result.review) { 
-    //         //             return [];
-    //         //         }
+            //         if (!result.review) { 
+            //             return [];
+            //         }
 
-    //         //         return {
-    //         //             body: result.review,
-    //         //             path: file.to,
-    //         //             position: Number(result.lineNumber),
-    //         //         };
-    //         //     });
+            //         return {
+            //             body: result.review,
+            //             path: file.to,
+            //             position: Number(result.lineNumber),
+            //         };
+            //     });
 
-    //         //     if (mappedResults) {
-    //         //         neededComments.push(...mappedResults);
-    //         //     }
-    //         // }
-    //     }
-    // }
+            //     if (mappedResults) {
+            //         neededComments.push(...mappedResults);
+            //     }
+            // }
+        }
+    }
     return [];
 }
 
