@@ -4,7 +4,7 @@ import parseDiff, { File } from "parse-diff"
 // import OpenAI from "openai"
 import * as core from "@actions/core"
 
-import { createReviewComment, gitDiff, PRDetails } from "./services/github";
+import { createReviewComment, gitDiff, PRDetails, SummaryBody, updateBody } from "./services/github";
 import { filter, minimatch } from "minimatch";
 import { prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
 
@@ -80,9 +80,10 @@ async function validateCode(diff: File[], details: Details) {
 
 
     if (foundSummary && foundSummary.length > 0) {
-        summaryAllMessages(foundSummary);
+        const summary:SummaryBody = await summaryAllMessages(foundSummary);
+        return summary;
     }
-    return [];
+    return {} as SummaryBody;
 }
 
 
@@ -115,10 +116,14 @@ async function main() {
         );
     });
 
-    const neededComments = await validateCode(filteredDiff, {
+    const neededComments: SummaryBody = await validateCode(filteredDiff, {
         title,
         description
     });
+
+    await updateBody(repository.owner.login, repository.name, number, neededComments);
+
+
 
     
     // console.log('neededComments', neededComments);

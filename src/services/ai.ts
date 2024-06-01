@@ -108,7 +108,8 @@ export async function summaryAllMessages(summaries: any[]) {
     });
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
-    console.log('resss', JSON.parse(resss));
+    
+    return JSON.parse(resss);
 }
 
 

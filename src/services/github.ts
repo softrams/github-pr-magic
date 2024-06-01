@@ -8,6 +8,14 @@ const octokit = new Octokit({
 });
 
 
+export interface SummaryBody {
+  summary: string;
+  changes: string;
+  typeChanges: string;
+  checklist: string;
+}
+
+
 export async function PRDetails(repository: any, number: number) {
   // Obtain the PR details
   const { data } = await octokit.pulls.get({
@@ -24,6 +32,30 @@ export async function PRDetails(repository: any, number: number) {
     patch_url: data.patch_url || "",
     diff_url: data.diff_url || "",
   };
+}
+
+export async function updateBody(owner: string, repo: string, pull_number: number, body: SummaryBody) {
+  const message = `
+    # Pull Request Summary 
+    ${body.summary}
+
+    ## Changes
+    ${body.changes}
+
+    ## Checklist
+    ${body.checklist}
+
+    ## Type Changes
+    ${body.typeChanges}
+  `
+
+  await octokit.pulls.update({
+    owner,
+    repo,
+    pull_number,
+    message,
+  });
+
 }
 
 
