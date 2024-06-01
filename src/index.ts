@@ -91,7 +91,7 @@ async function main() {
 
     console.log('neededComments', neededComments);
     if (neededComments && neededComments.length > 0) {
-        await createReviewComment(repository.owner.login, repository.name, number, neededComments[0]);
+        await createReviewComment(repository.owner.login, repository.name, number, neededComments);
     }
 
     // Validate Some Code Yo!
