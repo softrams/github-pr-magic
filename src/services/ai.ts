@@ -13,8 +13,9 @@ export async function createMessage(file: File, chunk: Chunk, details: Details) 
     const message = `
         Your requirement is to review pull request.
         Instructions below:
-         - Provide response in the Following JSON format: {"reviews": [{"lineNumber":  <line_number>, "review": "<review comment>"}]}.
-         - Provide comments and suggestiosn IF there is something to improve, otherwise "reviews" should be a empty array of reviews.
+         - Provide response in the Following JSON format: {"reviews": [{"lineNumber":  <line_number>, "review": "<review comment>", "required_changed": "<true or false>"}]}.
+         - Provide comments and suggestions IF there is something to improve, otherwise "reviews" should be a empty array of reviews.
+         - If you want to request changes that should be required, set "required_changed" to true.
          - Please write comment in Github Markdown Format.
          - Use the given pr description only for the overall context
         
@@ -37,6 +38,36 @@ export async function createMessage(file: File, chunk: Chunk, details: Details) 
     `
 
     return message;
+}
+
+export async function prSummaryCreation(diff_url: string, title: string) {
+    const message = `
+        Your requirement is to create a Pull Request Summary for this Pull Request.
+        Instructions below:
+         - Provide a detailed summary of the pull request based on the diff url below.
+         - Please write the result in Github Markdown Format.
+         - Provide the written summary in the following JSON format: {"What is changing?": "<What is changing>", "Why is this change needed?": "<Why is this change needed?>", "Anything Else?": "<Anything Else?>"}.
+         
+        
+        Review the following code diff in the file "${diff_url}" and take the pull request title: "${title}" into account when writing your response.
+    `
+
+    const response = await openai.chat.completions.create({
+        model: "gpt-4-1106-preview",
+        response_format: {
+            type: "json_object",
+        },
+        messages: [
+            {
+                role: "system",
+                content: message,
+            },
+        ],
+    });
+
+    const resss = response.choices[0].message?.content?.trim() || "{}";
+    console.log('resss', JSON.parse(resss));    
+
 }
 
 

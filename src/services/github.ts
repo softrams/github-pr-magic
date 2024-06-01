@@ -16,11 +16,10 @@ export async function PRDetails(repository: any, number: number) {
     pull_number: number,
   });
 
-  console.log('patchUrl', data.patch_url)
-
   return {
     title: data.title || "",
     description: data.body || "",
+    diff_url: data.diff_url || "",
   };
 }
 
@@ -55,9 +54,6 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
         console.log('createReviewComment error loops', error);
       }
     }
-
-
-
     console.log('createReviewComment error', newError.errors);
   }
 }

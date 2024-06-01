@@ -6,7 +6,7 @@ import * as core from "@actions/core"
 
 import { createReviewComment, gitDiff, PRDetails } from "./services/github";
 import { minimatch } from "minimatch";
-import { validateCodeViaAI } from "./services/ai";
+import { prSummaryCreation, validateCodeViaAI } from "./services/ai";
 
 
 const excludedFiles = core.getInput("expluded_files").split(",").map((s: string) => s.trim());
@@ -58,7 +58,7 @@ async function validateCode(diff: File[], details: Details) {
 async function main() {
     let dif: string | null = null;
     const { action, repository, number } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
-    const { title, description } = await PRDetails(repository, number);
+    const { title, description, diff_url } = await PRDetails(repository, number);
 
     const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
@@ -84,15 +84,17 @@ async function main() {
         );
     });
 
-    const neededComments = await validateCode(filteredDiff, {
-        title,
-        description
-    });
+    await prSummaryCreation(diff_url, title);
 
-    console.log('neededComments', neededComments);
-    if (neededComments && neededComments.length > 0) {
-        await createReviewComment(repository.owner.login, repository.name, number, neededComments);
-    }
+    // const neededComments = await validateCode(filteredDiff, {
+    //     title,
+    //     description
+    // });
+
+    // console.log('neededComments', neededComments);
+    // if (neededComments && neededComments.length > 0) {
+    //     await createReviewComment(repository.owner.login, repository.name, number, neededComments);
+    // }
 
     // Validate Some Code Yo!
 
