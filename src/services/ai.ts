@@ -82,6 +82,34 @@ export async function prSummaryCreation(file: File, chunk: Chunk, details: Detai
     return JSON.parse(resss).summary; 
 }
 
+export async function summaryAllMessages(summaries: any[]) {
+    const message = `
+        Your requirement is to merge all the summaries into one summary.
+        Instructions below:
+         - Provide a detailed summary of all the pull request summaries.
+         - Please write the result in Github Markdown Format.
+         - Provide the written summary in the following JSON format: {"summary": "<summary>"}.
+        
+        Summaries to review: ${summaries.map((s) => s.changes).join(", ")}
+    `
+
+    const response = await openai.chat.completions.create({
+        model: "gpt-4-1106-preview",
+        response_format: {
+            type: "json_object",
+        },
+        messages: [
+            {
+                role: "system",
+                content: message,
+            },
+        ],
+    });
+
+    const resss = response.choices[0].message?.content?.trim() || "{}";
+    console.log('resss', JSON.parse(resss));
+}
+
 
 export async function validateCodeViaAI(file: File, chunk: Chunk, details: Details) {
     try {

@@ -6,7 +6,7 @@ import * as core from "@actions/core"
 
 import { createReviewComment, gitDiff, PRDetails } from "./services/github";
 import { filter, minimatch } from "minimatch";
-import { prSummaryCreation, validateCodeViaAI } from "./services/ai";
+import { prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
 
 
 const excludedFiles = core.getInput("expluded_files").split(",").map((s: string) => s.trim());
@@ -19,10 +19,35 @@ export interface Details {
 
 async function validateCode(diff: File[], details: Details) {
     const neededComments = [];
+    const foundSummary = [];
     for (const file of diff) {
         for (const chunk of file.chunks) {
             const message = await prSummaryCreation(file, chunk, details);
             console.log('message', message);
+            if (message) {
+                const mappedResults = message.flatMap((result: any) => {
+                    if (!result.changes) {
+                        return [];
+                    }
+
+                    if (!result.typeChanges) { 
+                        return [];
+                    }
+
+                    if (!result.checklist) {
+                        return [];
+                    }
+
+
+                    return {
+                        changes: result.changes,
+                        typeChanges: result.typeChanges,
+                        checklist: result.checklist,
+                    };
+                });
+
+                foundSummary.push(...mappedResults);
+            }
             // const results = await validateCodeViaAI(file, chunk, details);
 
             // if (results) {
@@ -54,7 +79,9 @@ async function validateCode(diff: File[], details: Details) {
     }
 
 
-    console.log()
+    if (foundSummary && foundSummary.length > 0) {
+        summaryAllMessages(foundSummary);
+    }
     return [];
 }
 
