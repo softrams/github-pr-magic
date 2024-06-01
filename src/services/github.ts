@@ -16,7 +16,7 @@ export async function PRDetails(repository: any, number: number) {
     pull_number: number,
   });
 
-  console.log('data', data);
+  // console.log('data', data);
 
   return {
     title: data.title || "",

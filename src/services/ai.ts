@@ -69,7 +69,7 @@ export async function prSummaryCreation(file: File, title: string) {
     });
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
-    console.log('resss', JSON.parse(resss));    
+    return resss;   
 
 }
 

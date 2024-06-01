@@ -19,9 +19,24 @@ export interface Details {
 
 async function validateCode(diff: File[], details: Details) {
     const neededComments = [];
+    const summary = {
+        "What is changing?": "",
+        "Why is this change needed?": "",
+        "Anything Else?": "",
+    }
     for (const file of diff) {
-        const message = await prSummaryCreation(file, details.title);
-        console.log('message', message);  
+        const message: {
+            "What is changing?": string;
+            "Why is this change needed?": string;
+            "Anything Else?": string;
+        } = await prSummaryCreation(file, details.title);
+        console.log('message', message);
+
+        if (message) {
+            summary["What is changing?"] += message["What is changing?"];
+            summary["Why is this change needed?"] += message["Why is this change needed?"];
+            summary["Anything Else?"] += message["Anything Else?"];
+        }
         for (const chunk of file.chunks) {
             
             // const results = await validateCodeViaAI(file, chunk, details);
@@ -53,6 +68,9 @@ async function validateCode(diff: File[], details: Details) {
             // }
         }
     }
+
+
+    console.log('summary', summary);
     return [];
 }
 
