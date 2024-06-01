@@ -23,7 +23,7 @@ async function validateCode(diff: File[], details: Details) {
     for (const file of diff) {
         for (const chunk of file.chunks) {
             const message = await prSummaryCreation(file, chunk, details);
-            console.log('message', message);
+            // console.log('message', message);
             if (message) {
                 const mappedResults = message.flatMap((result: any) => {
                     if (!result.changes) {

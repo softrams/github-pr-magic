@@ -49,13 +49,18 @@ export async function updateBody(owner: string, repo: string, pull_number: numbe
     ${body.typeChanges}
   `
 
-  await octokit.pulls.update({
-    owner,
-    repo,
-    pull_number,
-    message,
-  });
+  console.log('messageBody', message)
 
+  try {
+    const {data} = await octokit.pulls.update({
+      owner,
+      repo,
+      pull_number,
+      message,
+    });
+  } catch (error) {
+    console.log('updateBody error', error);
+  }
 }
 
 
