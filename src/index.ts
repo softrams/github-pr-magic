@@ -88,10 +88,10 @@ async function main() {
         );
     });
 
-    // const neededComments = await validateCode(filteredDiff, {
-    //     title,
-    //     description
-    // });
+    const neededComments = await validateCode(filteredDiff, {
+        title,
+        description
+    });
 
     
     // console.log('neededComments', neededComments);
