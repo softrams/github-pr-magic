@@ -4,7 +4,7 @@ import parseDiff, { File } from "parse-diff"
 // import OpenAI from "openai"
 import * as core from "@actions/core"
 
-import { gitDiff, PRDetails } from "./services/github";
+import { createReviewComment, gitDiff, PRDetails } from "./services/github";
 import { minimatch } from "minimatch";
 import { validateCodeViaAI } from "./services/ai";
 
@@ -21,28 +21,29 @@ async function validateCode(diff: File[], details: Details) {
     const neededComments = [];
 
     for (const file of diff) {
-        console.log('file', file);
         for (const chunk of file.chunks) {
-            validateCodeViaAI(file, chunk, details)
+            const results = await validateCodeViaAI(file, chunk, details);
+
+            if (results) {
+                const mappedResults = results.flatMap((result: any) => {
+                    if (!file.to) {
+                        return [];
+                    }
+
+                    return {
+                        body: result.review,
+                        path: file.to,
+                        position: Number(result.lineNumber),
+                    };
+                });
+
+                if (mappedResults) {
+                    neededComments.push(...mappedResults);
+                }
+            }
         }
-        // const comments = [];
-        // for (const chunk of file.chunks) {
-        //     const lines = chunk.changes.map((change: Change) => change.content);
-        //     const code = lines.join("\n");
-        //     if (code.includes("console.log")) {
-        //         comments.push({
-        //             line: chunk.content[0].lineNumber,
-        //             message: "Remove console.log statements",
-        //         });
-        //     }
-        // }
-        // if (comments.length > 0) {
-        //     neededComments.push({
-        //         file: file.to,
-        //         comments,
-        //     });
-        // }
     }
+    return neededComments;
 }
 
 
@@ -75,10 +76,14 @@ async function main() {
         );
     });
 
-    validateCode(filteredDiff, {
+    const neededComments = await validateCode(filteredDiff, {
         title,
         description
-    })
+    });
+
+    if (neededComments && neededComments.length > 0) {
+        await createReviewComment(repository.owner, repository.name, number, neededComments);
+    }
 
     // Validate Some Code Yo!
 
