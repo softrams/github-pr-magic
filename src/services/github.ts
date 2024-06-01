@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import * as core from "@actions/core"
+import { RequestError } from '@octokit/types';
 const GITHUB_TOKEN: string = core.getInput("github_token");
 
 const octokit = new Octokit({
@@ -38,7 +39,6 @@ export async function gitDiff(owner: string, repo: string, pull_number: number) 
 
 
 export async function createReviewComment(owner: string, repo: string, pull_number: number, comments: any[]) {
-  // Create a review comment
   try {
     await octokit.pulls.createReview({
       owner,
@@ -48,6 +48,16 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
       comments,
     }); 
   } catch (error) {
-    console.log('createReviewComment error', error);
+    const newError = error as RequestError;
+    if (newError.errors) {
+      for (let index = 0; index < newError.errors.length; index++) {
+        const error = newError.errors[index];
+        console.log('createReviewComment error loops', error);
+      }
+    }
+
+
+
+    console.log('createReviewComment error', newError);
   }
 }
