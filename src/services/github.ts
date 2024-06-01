@@ -41,7 +41,7 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
     owner,
     repo,
     pull_number,
-    event: "COMMENT",
+    event: "REQUEST_CHANGES",
     comments,
   }); 
 }

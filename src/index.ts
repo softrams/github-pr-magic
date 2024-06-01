@@ -82,7 +82,7 @@ async function main() {
     });
 
     if (neededComments && neededComments.length > 0) {
-        await createReviewComment(repository.owner, repository.name, number, neededComments);
+        await createReviewComment(repository.owner.login, repository.name, number, neededComments);
     }
 
     // Validate Some Code Yo!
