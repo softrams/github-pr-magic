@@ -14,6 +14,7 @@
     "@octokit/rest": "^20.1.1",
     "@tandil/diffparse": "^0.2.0",
     "minimatch": "^9.0.4",
-    "openai": "^4.47.3"
+    "openai": "^4.47.3",
+    "parse-diff": "^0.11.1"
   }
 }

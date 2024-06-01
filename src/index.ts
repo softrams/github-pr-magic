@@ -1,5 +1,6 @@
 const parser = require('@tandil/diffparse');
 import { readFileSync } from "fs"
+import parseDiff from "parse-diff"
 // import OpenAI from "openai"
 import * as core from "@actions/core"
 
@@ -64,8 +65,9 @@ async function main() {
         return;
     }
 
-    const diff = parser.parseDiffString(dif);
-    const filteredDiff = diff.files.filter((file: { to: any; }) => {
+    // const diff = parser.parseDiffString(dif);
+    const diff = parseDiff(dif);
+    const filteredDiff = diff.filter((file) => {
         return !excludedFiles.some((pattern) =>
           minimatch(file.to ?? "", pattern)
         );
