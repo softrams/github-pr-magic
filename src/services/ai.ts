@@ -50,6 +50,8 @@ export async function prSummaryCreation(diff_url: string, title: string) {
          
         
         Review the following code diff in the file "${diff_url}" and take the pull request title: "${title}" into account when writing your response.
+
+        Git diff to review: "${diff_url}"
     `
 
     const response = await openai.chat.completions.create({
