@@ -85,9 +85,11 @@ async function main() {
         description
     });
 
-    if (neededComments && neededComments.length > 0) {
-        await createReviewComment(repository.owner.login, repository.name, number, neededComments);
-    }
+    // if (neededComments && neededComments.length > 0) {
+    //     await createReviewComment(repository.owner.login, repository.name, number, neededComments);
+    // }
+
+    console.log('neededComments', neededComments);
 
     // Validate Some Code Yo!
 
