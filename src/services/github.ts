@@ -74,6 +74,7 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
       comments,
     }); 
   } catch (error) {
+    console.log('basicError', error);
     const newError = error as RequestError;
     if (newError.errors) {
       for (let index = 0; index < newError.errors.length; index++) {
@@ -81,7 +82,7 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
         console.log('createReviewComment error loops', error);
       }
     }
-    console.log('createReviewComment error', newError.errors);
+    console.log('createReviewComment error', newError);
   }
 }
 
