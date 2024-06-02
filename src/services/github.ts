@@ -35,12 +35,13 @@ export async function PRDetails(repository: any, number: number) {
 }
 
 export async function updateBody(owner: string, repo: string, pull_number: number, body: string) {
+  const regexForReplacing = /(```.+?```)/gms;
   try {
     const { data } = await octokit.pulls.update({
       owner,
       repo,
       pull_number,
-      body,
+      body: body.replace(regexForReplacing, ""),
     });
     console.log('updateBody', data);
   } catch (error) {
