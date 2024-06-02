@@ -16,7 +16,7 @@ export interface Event {
   after?: string;
 }
 
-const regexForReplacing = /(```.+?```)/gms;
+const regexForReplacing = /```[^\S\r\n]*[a-z]*\n.*?\n```/gms;
 
 
 export async function PRDetails(repository: any, number: number) {
