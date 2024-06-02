@@ -182,9 +182,12 @@ async function main() {
         description
     });
 
-    const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
+    if (detailedFeedback && detailedFeedback.length > 0) {
+        console.log('feedbacks_index', detailedFeedback);
+        const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
 
-    console.log('feedback_result', resultsFullFeedback);
+        console.log('feedback_result', resultsFullFeedback);
+    }
 
     if (action === "opened" && createPullRequestSummary) {
         console.log('Generating summary for new PR');
