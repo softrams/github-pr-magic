@@ -122,7 +122,7 @@ async function main() {
         description
     });
 
-    console.log('neededComments', neededComments);
+    // console.log('neededComments', neededComments);
     // await updateBody(repository.owner.login, repository.name, number, neededComments);
 
 
