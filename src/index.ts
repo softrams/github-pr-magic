@@ -4,7 +4,7 @@ import * as core from "@actions/core"
 
 import { compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
 import { filter, minimatch } from "minimatch";
-import { obtainFeedback, prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
+import { obtainFeedback, prSummaryCreation, summaryAllMessages, summaryOfAllFeedback, validateCodeViaAI } from "./services/ai";
 
 
 const excludedFiles = core.getInput("excluded_files").split(",").map((s: string) => s.trim());
@@ -101,36 +101,28 @@ async function validateOverallCodeReview(diff: File[], details: Details) {
     for (const file of diff) {
         for (const chunk of file.chunks) {
             const results = await obtainFeedback(file, chunk, details);
+            if (results) {
+                const mappedResults = results.flatMap((result: any) => {
+                    if (!file.to) {
+                        return [];
+                    }
 
-            console.log('results', results);
+                    return {
+                        changesOverview: result.changesOverview,
+                        feedback: result.feedback,
+                        improvements: result.improvements,
+                        conclusion: result.conclusion,
+                    };
+                });
 
-            // if (results) {
-            //     const mappedResults = results.flatMap((result: any) => {
-            //         if (!file.to) {
-            //             return [];
-            //         }
-
-            //         if (!result.lineNumber) {
-            //             return [];
-            //         }
-
-            //         if (!result.review) { 
-            //             return [];
-            //         }
-
-            //         return {
-            //             body: result.review,
-            //             path: file.to,
-            //             position: Number(result.lineNumber),
-            //         };
-            //     });
-
-            //     if (mappedResults) {
-            //         neededComments.push(...mappedResults);
-            //     }
-            // }
+                if (mappedResults) {
+                    detailedFeedback.push(...mappedResults);
+                }
+            }
         }
     }
+
+    return detailedFeedback;
 }
 
 
@@ -185,10 +177,14 @@ async function main() {
         await createReviewComment(repository.owner.login, repository.name, number, neededComments);
     }
 
-    await validateOverallCodeReview(diff, {
+    const detailedFeedback = await validateOverallCodeReview(diff, {
         title,
         description
-    })
+    });
+
+    const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
+
+    console.log('feedback_result', resultsFullFeedback);
 
     if (action === "opened" && createPullRequestSummary) {
         console.log('Generating summary for new PR');

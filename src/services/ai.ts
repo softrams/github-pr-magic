@@ -123,6 +123,36 @@ export async function obtainFeedback(file: File, chunk: Chunk, details: Details)
     return JSON.parse(resss).feedback; 
 }
 
+export async function summaryOfAllFeedback(feedbacks: any[]) {
+    const systemMessage = `
+        Your requirement is to merge all the feedbacks into one feedback.
+        Instructions below:
+         - Please write the result in Github Markdown Format.
+         - Provide the written feedback written as a Github Comment format.
+         - Please format each header as a H2 header.
+    `
+    const message = `
+        Feedback to review: ${feedbacks.map((f) => f).join(", ")}
+    `
+
+    const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+            {
+                role: "system",
+                content: systemMessage,
+            },
+            {
+                role: "user",
+                content: message,
+            },
+        ],
+    });
+
+    const resss = response.choices[0].message?.content?.trim() || "{}";
+    return resss;
+}
+
 export async function summaryAllMessages(summaries: any[]) {
     const systemMessage = `
         Your requirement is to merge all the summaries into one summary.
