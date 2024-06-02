@@ -4,7 +4,7 @@ import * as core from "@actions/core"
 
 import { compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
 import { filter, minimatch } from "minimatch";
-import { prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
+import { obtainFeedback, prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
 
 
 const excludedFiles = core.getInput("excluded_files").split(",").map((s: string) => s.trim());
@@ -96,6 +96,43 @@ async function validateCode(diff: File[], details: Details) {
     return neededComments;
 }
 
+async function validateOverallCodeReview(diff: File[], details: Details) {
+    const detailedFeedback = [];
+    for (const file of diff) {
+        for (const chunk of file.chunks) {
+            const results = await obtainFeedback(file, chunk, details);
+
+            console.log('results', results);
+
+            // if (results) {
+            //     const mappedResults = results.flatMap((result: any) => {
+            //         if (!file.to) {
+            //             return [];
+            //         }
+
+            //         if (!result.lineNumber) {
+            //             return [];
+            //         }
+
+            //         if (!result.review) { 
+            //             return [];
+            //         }
+
+            //         return {
+            //             body: result.review,
+            //             path: file.to,
+            //             position: Number(result.lineNumber),
+            //         };
+            //     });
+
+            //     if (mappedResults) {
+            //         neededComments.push(...mappedResults);
+            //     }
+            // }
+        }
+    }
+}
+
 
 async function main() {
     let dif: string | null = null;
@@ -105,7 +142,6 @@ async function main() {
 
     if (action === "opened") {
         // Generate a summary of the PR since it's a new PR
-        console.log('Generating summary for new PR');
         const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
     } else if (action === "synchronize") {
@@ -139,7 +175,8 @@ async function main() {
     });
 
     if (reviewCode) {
-        console.log('filterDiff', filteredDiff)
+        // @ToDo Improve the support for comments, 
+        // IE: Remove outdated comments when code is changed, revalidated if the Pull Request is ready to be approved.
         const neededComments = await validateCode(filteredDiff, {
             title,
             description
@@ -148,7 +185,13 @@ async function main() {
         await createReviewComment(repository.owner.login, repository.name, number, neededComments);
     }
 
+    await validateOverallCodeReview(diff, {
+        title,
+        description
+    })
+
     if (action === "opened" && createPullRequestSummary) {
+        console.log('Generating summary for new PR');
         const summary = await validatePullRequest(diff, {
             title,
             description

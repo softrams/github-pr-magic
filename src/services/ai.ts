@@ -82,6 +82,47 @@ export async function prSummaryCreation(file: File, chunk: Chunk, details: Detai
     return JSON.parse(resss).summary; 
 }
 
+export async function obtainFeedback(file: File, chunk: Chunk, details: Details) {
+    const message = `
+        Your requirement is to create a Feedback for this Pull Request.
+        Instructions below:
+         - Provide a detailed feedback of the pull request based on the diff below.
+         - Please write the result in Github Markdown Format.
+         - Provide the written feedback in the following JSON format: {"feedback": [{"changesOverview": "<changesOverview>", "feedback": "<feedback", "improvements", "<improvements>", "conclusion": "<conclusion>"}]}.
+         
+        
+        Review the following code diff in the files "${file.to}", and take the pull request title: ${details.title} into account when writing your response.
+
+        Pull Request title: ${details.title}
+
+        Files to review: ${file.to}
+
+        Git diff to review:
+
+        ${chunk.content}
+        ${chunk.changes
+          // @ts-expect-error - ln and ln2 exists where needed
+          .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
+          .join("\n")}
+    `
+
+    const response = await openai.chat.completions.create({
+        model: "gpt-4-1106-preview",
+        response_format: {
+            type: "json_object",
+        },
+        messages: [
+            {
+                role: "system",
+                content: message,
+            },
+        ],
+    });
+
+    const resss = response.choices[0].message?.content?.trim() || "{}";
+    return JSON.parse(resss).feedback; 
+}
+
 export async function summaryAllMessages(summaries: any[]) {
     const systemMessage = `
         Your requirement is to merge all the summaries into one summary.
@@ -95,9 +136,6 @@ export async function summaryAllMessages(summaries: any[]) {
 
     const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        // response_format: {
-        //     type: "json_object",
-        // },
         messages: [
             {
                 role: "system",
@@ -110,11 +148,7 @@ export async function summaryAllMessages(summaries: any[]) {
         ],
     });
 
-    // console.log('response', response)
-
     const resss = response.choices[0].message?.content?.trim() || "{}";
-    console.log('ress_non_parsed', resss);
-    // console.log('resss', JSON.parse(resss));
     return resss;
 }
 
