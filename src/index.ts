@@ -80,11 +80,11 @@ async function validateCode(diff: File[], details: Details) {
 
 
     if (foundSummary && foundSummary.length > 0) {
-         await summaryAllMessages(foundSummary);
+         const bodyIdea = await summaryAllMessages(foundSummary);
         // console.log('summary', summary);
-        // return summary;
+        return bodyIdea;
     }
-    return {} as SummaryBody;
+    return '';
 }
 
 
@@ -117,13 +117,13 @@ async function main() {
         );
     });
 
-    const neededComments: SummaryBody = await validateCode(filteredDiff, {
+    const neededComments = await validateCode(filteredDiff, {
         title,
         description
     });
 
     // console.log('neededComments', neededComments);
-    // await updateBody(repository.owner.login, repository.name, number, neededComments);
+    await updateBody(repository.owner.login, repository.name, number, neededComments);
 
 
 

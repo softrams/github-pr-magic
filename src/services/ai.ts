@@ -110,12 +110,12 @@ export async function summaryAllMessages(summaries: any[]) {
         ],
     });
 
-    console.log('response', response)
+    // console.log('response', response)
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
     console.log('ress_non_parsed', resss);
     // console.log('resss', JSON.parse(resss));
-    // return JSON.parse(resss);
+    return JSON.parse(resss);
 }
 
 

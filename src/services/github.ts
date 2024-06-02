@@ -34,25 +34,13 @@ export async function PRDetails(repository: any, number: number) {
   };
 }
 
-export async function updateBody(owner: string, repo: string, pull_number: number, body: SummaryBody) {
-  const message = `
-    # Pull Request Summary 
-    ${body.summary}
-
-    ${body.changes}
-
-    ## Checklist
-    ${body.checklist}
-
-    ${body.typeChanges}
-  `;
-
+export async function updateBody(owner: string, repo: string, pull_number: number, body: string) {
   try {
     const { data } = await octokit.pulls.update({
       owner,
       repo,
       pull_number,
-      body: message,
+      body,
     });
     console.log('updateBody', data);
   } catch (error) {
