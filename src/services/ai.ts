@@ -86,11 +86,7 @@ export async function summaryAllMessages(summaries: any[]) {
     const systemMessage = `
         Your requirement is to merge all the summaries into one summary.
         Instructions below:
-         - Provide a detailed summary of all the pull request summaries.
          - Please write the result in Github Markdown Format.
-         - Provide checklist of all the summaries in Markdown Format of checkboxs.
-         - Provide the writen changes of all the summaries in Markdown Format.
-         - Provide the writen type changes of all the summaries in Markdown Format.  
          - Provide the written summary written as a Github Pull Request Body.
     `
     const message = `
