@@ -38,12 +38,14 @@ export async function PRDetails(repository: any, number: number) {
 }
 
 export async function commentOnPullRequest(event: Event, body: string) {
-  octokit.rest.issues.createComment({
+  const {data}  = await octokit.rest.issues.createComment({
     owner: event.owner,
     repo: event.repo,
     issue_number: event.number,
     body: body.replace(regexForReplacing, ""),
   });
+
+  console.log('commentOnPullRequest', data);
 }
 
 export async function updateBody(owner: string, repo: string, pull_number: number, body: string) {
