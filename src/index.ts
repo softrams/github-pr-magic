@@ -131,29 +131,27 @@ async function main() {
     const { action, repository, number, before, after } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
     const { title, description, patch_url, diff_url } = await PRDetails(repository, number);
 
-    const data = await gitDiff(repository.owner.login, repository.name, number);
-    dif = data as unknown as string;
-    // if (action === "opened") {
-    //     // Generate a summary of the PR since it's a new PR
-    //     const data = await gitDiff(repository.owner.login, repository.name, number);
-    //     dif = data as unknown as string;
-    // } else if (action === "synchronize") {
-    //     const newBaseSha = before;
-    //     const newHeadSha = after;
+    if (action === "opened") {
+        // Generate a summary of the PR since it's a new PR
+        const data = await gitDiff(repository.owner.login, repository.name, number);
+        dif = data as unknown as string;
+    } else if (action === "synchronize") {
+        const newBaseSha = before;
+        const newHeadSha = after;
     
-    //     const data = await compareCommits({
-    //         owner: repository.owner.login,
-    //         repo: repository.name,
-    //         before: newBaseSha,
-    //         after: newHeadSha,
-    //         number
-    //     })
+        const data = await compareCommits({
+            owner: repository.owner.login,
+            repo: repository.name,
+            before: newBaseSha,
+            after: newHeadSha,
+            number
+        })
     
-    //     dif = String(data);
-    // } else {
-    //     console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
-    //     return;
-    // }
+        dif = String(data);
+    } else {
+        console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
+        return;
+    }
 
     if (!dif) {
         // Well shit.
@@ -167,43 +165,44 @@ async function main() {
         );
     });
 
-    // if (reviewCode) {
-    //     // @ToDo Improve the support for comments, 
-    //     // IE: Remove outdated comments when code is changed, revalidated if the Pull Request is ready to be approved.
-    //     const neededComments = await validateCode(filteredDiff, {
-    //         title,
-    //         description
-    //     });
-
-    //     await createReviewComment(repository.owner.login, repository.name, number, neededComments);
-    // }
-
-    const detailedFeedback = await validateOverallCodeReview(filteredDiff, {
-        title,
-        description
-    });
-
-    if (detailedFeedback && detailedFeedback.length > 0) {
-        console.log('feedbacks_index', detailedFeedback);
-        const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
-
-        console.log('feedback_result', resultsFullFeedback);
-
-        await commentOnPullRequest({
-            owner: repository.owner.login,
-            repo: repository.name,
-            number
-        }, resultsFullFeedback);
-    }
-
-    if (action === "opened" && createPullRequestSummary) {
-        console.log('Generating summary for new PR');
-        const summary = await validatePullRequest(diff, {
+    if (reviewCode) {
+        // @ToDo Improve the support for comments, 
+        // IE: Remove outdated comments when code is changed, revalidated if the Pull Request is ready to be approved.
+        const neededComments = await validateCode(filteredDiff, {
             title,
             description
         });
+        console.log('comments', neededComments);
+        // await createReviewComment(repository.owner.login, repository.name, number, neededComments);
+    }
 
-        await updateBody(repository.owner.login, repository.name, number, summary)
+    if (action === "opened") {
+        if (createPullRequestSummary) {
+            console.log('Generating summary for new PR');
+            const summary = await validatePullRequest(diff, {
+                title,
+                description
+            });
+
+            await updateBody(repository.owner.login, repository.name, number, summary)
+        }
+
+        if (overallReview) {
+            const detailedFeedback = await validateOverallCodeReview(filteredDiff, {
+                title,
+                description
+            });
+        
+            if (detailedFeedback && detailedFeedback.length > 0) {
+                const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
+        
+                await commentOnPullRequest({
+                    owner: repository.owner.login,
+                    repo: repository.name,
+                    number
+                }, resultsFullFeedback);
+            }
+        }
     }
 }
 

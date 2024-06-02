@@ -16,8 +16,6 @@ export interface Event {
   after?: string;
 }
 
-const regexForReplacing = /```[^\S\r\n]*[a-z]*\n.*?\n```/gms;
-
 
 export async function PRDetails(repository: any, number: number) {
   // Obtain the PR details
@@ -38,19 +36,19 @@ export async function PRDetails(repository: any, number: number) {
 }
 
 export async function commentOnPullRequest(event: Event, body: string) {
-  // console.log('body', body)
-  // console.log('bodyReg', body.replace(regexForReplacing, ""));
+  const regexForReplacing = /```markdown(.*?)```/gms;
   const {data}  = await octokit.rest.issues.createComment({
     owner: event.owner,
     repo: event.repo,
     issue_number: event.number,
-    body,
+    body: body.replace(regexForReplacing, ""),
   });
 
   console.log('commentOnPullRequest', data);
 }
 
 export async function updateBody(owner: string, repo: string, pull_number: number, body: string) {
+  const regexForReplacing = /```markdown(.*?)```/gms;
   try {
     const { data } = await octokit.pulls.update({
       owner,
