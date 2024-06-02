@@ -78,7 +78,7 @@ export async function prSummaryCreation(file: File, chunk: Chunk, details: Detai
     });
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
-    // console.log('resss', JSON.parse(resss));
+    console.log('resss', JSON.parse(resss));
     return JSON.parse(resss).summary; 
 }
 
@@ -87,10 +87,9 @@ export async function summaryAllMessages(summaries: any[]) {
         Your requirement is to merge all the summaries into one summary.
         Instructions below:
          - Provide a detailed summary of all the pull request summaries.
-         - Please write the result in Markdown Format.
+         - Please write the result in Github Markdown Format.
          - Provide the written summary in the following JSON format: {"summary": "<summary>", "changes": "<changes>", "typeChanges": "<typeChanges", "checklist": "<checklist>"}.
-
-
+        
         Summaries to review: ${summaries.map((s) => s.changes).join(", ")}
     `
 
@@ -108,7 +107,7 @@ export async function summaryAllMessages(summaries: any[]) {
     });
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
-    
+    console.log('resss', JSON.parse(resss));
     return JSON.parse(resss);
 }
 
