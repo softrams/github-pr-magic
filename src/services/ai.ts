@@ -115,7 +115,7 @@ export async function summaryAllMessages(summaries: any[]) {
     const resss = response.choices[0].message?.content?.trim() || "{}";
     console.log('ress_non_parsed', resss);
     // console.log('resss', JSON.parse(resss));
-    return JSON.parse(resss);
+    return resss;
 }
 
 
