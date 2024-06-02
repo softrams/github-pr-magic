@@ -39,17 +39,13 @@ export async function updateBody(owner: string, repo: string, pull_number: numbe
     # Pull Request Summary 
     ${body.summary}
 
-    ## Changes
     ${body.changes}
 
     ## Checklist
     ${body.checklist}
 
-    ## Type Changes
     ${body.typeChanges}
   `;
-
-  console.log('messageBody', message)
 
   try {
     const { data } = await octokit.pulls.update({
