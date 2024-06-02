@@ -42,7 +42,7 @@ export async function commentOnPullRequest(event: Event, body: string) {
     owner: event.owner,
     repo: event.repo,
     issue_number: event.number,
-    body,
+    body: body.replace(regexForReplacing, ""),
   });
 }
 
