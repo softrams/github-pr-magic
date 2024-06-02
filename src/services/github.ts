@@ -47,7 +47,7 @@ export async function updateBody(owner: string, repo: string, pull_number: numbe
 
     ## Type Changes
     ${body.typeChanges}
-  `
+  `;
 
   console.log('messageBody', message)
 
@@ -56,7 +56,7 @@ export async function updateBody(owner: string, repo: string, pull_number: numbe
       owner,
       repo,
       pull_number,
-      message,
+      body: message,
     });
     console.log('updateBody', data);
   } catch (error) {
