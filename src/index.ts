@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import parseDiff, { File } from "parse-diff"
 import * as core from "@actions/core"
 
-import { compareCommits, createReviewComment, gitDiff, PRDetails, SummaryBody, updateBody } from "./services/github";
+import { compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
 import { filter, minimatch } from "minimatch";
 import { prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
 
