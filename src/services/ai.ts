@@ -124,6 +124,7 @@ export async function obtainFeedback(file: File, chunk: Chunk, details: Details)
 }
 
 export async function summaryOfAllFeedback(feedbacks: any[]) {
+    console.log('feedbacks', feedbacks);
     const systemMessage = `
         Your requirement is to merge all the feedbacks into one feedback.
         Instructions below:
