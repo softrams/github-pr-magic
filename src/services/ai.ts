@@ -132,7 +132,11 @@ export async function summaryOfAllFeedback(feedbacks: any[]) {
          - Please format each header as a H2 header.
     `
     const message = `
-        Feedback to review: ${feedbacks.map((f) => f).join(", ")}
+        Feedback to review: 
+        ${feedbacks.map((f) => f.changesOverview).join(", ")}
+        ${feedbacks.map((f) => f.feedback).join(", ")}
+        ${feedbacks.map((f) => f.improvements).join(", ")}
+        ${feedbacks.map((f) => f.conclusion).join(", ")}
     `
 
     const response = await openai.chat.completions.create({
