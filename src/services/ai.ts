@@ -99,9 +99,9 @@ export async function summaryAllMessages(summaries: any[]) {
 
     const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        response_format: {
-            type: "json_object",
-        },
+        // response_format: {
+        //     type: "json_object",
+        // },
         messages: [
             {
                 role: "system",
@@ -118,7 +118,7 @@ export async function summaryAllMessages(summaries: any[]) {
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
     console.log('ress_non_parsed', resss);
-    console.log('resss', JSON.parse(resss));
+    // console.log('resss', JSON.parse(resss));
     // return JSON.parse(resss);
 }
 
