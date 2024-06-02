@@ -5,9 +5,10 @@ inputs:
   github_token:
     description: 'Github token'
     required: true
-  pr_number:
-    description: 'PR number'
-    required: true
+  excluded_files:
+    description: 'Files to exclude from review'
+    required: false
+    default: 'node_modules, package-lock.json, yarn.lock'
   openai_api_key:
     description: 'OpenAI API key'
     required: true
@@ -19,6 +20,14 @@ inputs:
     description: 'Review code'
     required: false
     default: true
+  generate_summary:
+    description: 'Generates Pull Request summary based on git diff and code changes'
+    required: false
+    default: false
+  overall_code_review:
+    description: 'Overall code review as a comment'
+    required: false
+    default: false
 runs:
   using: 'node20'
   main: 'lib/index.js'

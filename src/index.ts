@@ -1,15 +1,16 @@
-const parser = require('@tandil/diffparse');
 import { readFileSync } from "fs"
 import parseDiff, { File } from "parse-diff"
-// import OpenAI from "openai"
 import * as core from "@actions/core"
 
-import { createReviewComment, gitDiff, PRDetails, SummaryBody, updateBody } from "./services/github";
+import { compareCommits, createReviewComment, gitDiff, PRDetails, SummaryBody, updateBody } from "./services/github";
 import { filter, minimatch } from "minimatch";
 import { prSummaryCreation, summaryAllMessages, validateCodeViaAI } from "./services/ai";
 
 
-const excludedFiles = core.getInput("expluded_files").split(",").map((s: string) => s.trim());
+const excludedFiles = core.getInput("excluded_files").split(",").map((s: string) => s.trim());
+const createPullRequestSummary = core.getInput("generate_summary");
+const reviewCode = core.getInput("review_code")
+const overallReview = core.getInput("overall_code_review");
 
 
 export interface Details {
@@ -17,13 +18,11 @@ export interface Details {
     description: string;
 }
 
-async function validateCode(diff: File[], details: Details) {
-    const neededComments = [];
+async function validatePullRequest(diff: File[], details: Details) {
     const foundSummary = [];
     for (const file of diff) {
         for (const chunk of file.chunks) {
             const message = await prSummaryCreation(file, chunk, details);
-            // console.log('message', message);
             if (message) {
                 const mappedResults = message.flatMap((result: any) => {
                     if (!result.changes) {
@@ -48,62 +47,84 @@ async function validateCode(diff: File[], details: Details) {
 
                 foundSummary.push(...mappedResults);
             }
-            // const results = await validateCodeViaAI(file, chunk, details);
-
-            // if (results) {
-            //     const mappedResults = results.flatMap((result: any) => {
-            //         if (!file.to) {
-            //             return [];
-            //         }
-
-            //         if (!result.lineNumber) {
-            //             return [];
-            //         }
-
-            //         if (!result.review) { 
-            //             return [];
-            //         }
-
-            //         return {
-            //             body: result.review,
-            //             path: file.to,
-            //             position: Number(result.lineNumber),
-            //         };
-            //     });
-
-            //     if (mappedResults) {
-            //         neededComments.push(...mappedResults);
-            //     }
-            // }
         }
     }
 
 
     if (foundSummary && foundSummary.length > 0) {
          const bodyIdea = await summaryAllMessages(foundSummary);
-        // console.log('summary', summary);
         return bodyIdea;
     }
+
     return '';
+}
+
+async function validateCode(diff: File[], details: Details) {
+    const neededComments = [];
+    for (const file of diff) {
+        for (const chunk of file.chunks) {
+            const results = await validateCodeViaAI(file, chunk, details);
+
+            if (results) {
+                const mappedResults = results.flatMap((result: any) => {
+                    if (!file.to) {
+                        return [];
+                    }
+
+                    if (!result.lineNumber) {
+                        return [];
+                    }
+
+                    if (!result.review) { 
+                        return [];
+                    }
+
+                    return {
+                        body: result.review,
+                        path: file.to,
+                        position: Number(result.lineNumber),
+                    };
+                });
+
+                if (mappedResults) {
+                    neededComments.push(...mappedResults);
+                }
+            }
+        }
+    }
+
+    return neededComments;
 }
 
 
 async function main() {
     let dif: string | null = null;
-    const { action, repository, number } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
+    const { action, repository, number, before, after } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
     const { title, description, patch_url, diff_url } = await PRDetails(repository, number);
 
-    const data = await gitDiff(repository.owner.login, repository.name, number);
+
+    if (action === "opened") {
+        // Generate a summary of the PR since it's a new PR
+        console.log('Generating summary for new PR');
+        const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
-        // console.log('data', data)
-    // if (action === "opened") {
-    //     // Generate a summary of the PR since it's a new PR
-    //     console.log('Generating summary for new PR');
-    //     const data = await gitDiff(repository.owner.login, repository.name, number);
-    //     // diff = data.body;
-    //     console.log('data', data)
-    //     // dif = await gitDiff(repository.owner.login, repository.name, number) as string;
-    // }
+    } else if (action === "synchronize") {
+        const newBaseSha = before;
+        const newHeadSha = after;
+    
+        const data = await compareCommits({
+            owner: repository.owner.login,
+            repo: repository.name,
+            before: newBaseSha,
+            after: newHeadSha,
+            number
+        })
+    
+        dif = String(data);
+    } else {
+        console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
+        return;
+    }
 
     if (!dif) {
         // Well shit.
@@ -117,25 +138,24 @@ async function main() {
         );
     });
 
-    const neededComments = await validateCode(filteredDiff, {
-        title,
-        description
-    });
+    if (reviewCode) {
+        console.log('filterDiff', filteredDiff)
+        const neededComments = await validateCode(filteredDiff, {
+            title,
+            description
+        });
 
-    // console.log('neededComments', neededComments);
-    await updateBody(repository.owner.login, repository.name, number, neededComments);
+        await createReviewComment(repository.owner.login, repository.name, number, neededComments);
+    }
 
+    if (action === "opened" && createPullRequestSummary) {
+        const summary = await validatePullRequest(diff, {
+            title,
+            description
+        });
 
-
-    
-    // console.log('neededComments', neededComments);
-    // if (neededComments && neededComments.length > 0) {
-    //     await createReviewComment(repository.owner.login, repository.name, number, neededComments);
-    // }
-
-    // Validate Some Code Yo!
-
-    // Post some comments
+        await updateBody(repository.owner.login, repository.name, number, summary)
+    }
 }
 
 main();

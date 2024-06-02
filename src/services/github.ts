@@ -8,11 +8,12 @@ const octokit = new Octokit({
 });
 
 
-export interface SummaryBody {
-  summary: string;
-  changes: string;
-  typeChanges: string;
-  checklist: string;
+export interface Event {
+  owner: string;
+  number: number;
+  repo: any;
+  before?: string;
+  after?: string;
 }
 
 
@@ -82,4 +83,18 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
     }
     console.log('createReviewComment error', newError.errors);
   }
+}
+
+export async function compareCommits(event: Event) {
+  const { data } = await octokit.repos.compareCommits({
+    headers: {
+      accept: "application/vnd.github.v3.diff",
+    },
+    owner: event.owner,
+    repo: event.repo,
+    base: event.before || "",
+    head: event.after || "",
+  });
+
+  return data;
 }
