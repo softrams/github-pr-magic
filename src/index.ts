@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import parseDiff, { File } from "parse-diff"
 import * as core from "@actions/core"
 
-import { compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
+import { commentOnPullRequest, compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
 import { filter, minimatch } from "minimatch";
 import { obtainFeedback, prSummaryCreation, summaryAllMessages, summaryOfAllFeedback, validateCodeViaAI } from "./services/ai";
 
@@ -188,6 +188,12 @@ async function main() {
         const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
 
         console.log('feedback_result', resultsFullFeedback);
+
+        await commentOnPullRequest({
+            owner: repository.owner.login,
+            repo: repository.name,
+            number
+        }, resultsFullFeedback);
     }
 
     if (action === "opened" && createPullRequestSummary) {
