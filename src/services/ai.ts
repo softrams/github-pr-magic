@@ -14,8 +14,10 @@ export async function createMessage(file: File, chunk: Chunk, details: Details) 
         Your requirement is to review pull request.
         Instructions below:
          - Provide response in the Following JSON format: {"reviews": [{"lineNumber":  <line_number>, "review": "<review comment>", "required_changed": "<true or false>"}]}.
+         - Do not give positive comments or compliments.
          - Provide comments and suggestions IF there is something to improve, otherwise "reviews" should be a empty array of reviews.
          - If you want to request changes that should be required, set "required_changed" to true.
+         - REQUIRED: Do not suggest adding comments to the code.
          - Please write comment in Github Markdown Format.
          - Use the given pr description only for the overall context
         
