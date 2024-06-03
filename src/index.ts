@@ -79,15 +79,10 @@ async function validateCode(diff: File[], details: Details) {
                         return [];
                     }
 
-                    if (!result.required_changed) {
-                        return [];
-                    }
-
                     return {
                         body: result.review,
                         path: file.to,
-                        position: Number(result.lineNumber),
-                        required_changed: result.required_changed,
+                        position: Number(result.lineNumber)
                     };
                 });
 
