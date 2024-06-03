@@ -85,14 +85,17 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
         pull_number,
         event: "APPROVE",
       });
+
+      return data;
     };
-    await octokit.pulls.createReview({
+    const { data } = await octokit.pulls.createReview({
       owner,
       repo,
       pull_number,
       event: "REQUEST_CHANGES",
       comments,
     }); 
+    return data;
   } catch (error) {
     console.log('basicError', error);
     const newError = error as RequestError;
