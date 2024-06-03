@@ -31,4 +31,3 @@ inputs:
 runs:
   using: 'node20'
   main: 'lib/index.js'
-  
