@@ -176,42 +176,21 @@ async function main() {
             await updateBody(repository.owner.login, repository.name, number, summary)
         }
 
-        // if (overallReview) {
-        //     const detailedFeedback = await validateOverallCodeReview(filteredDiff, {
-        //         title,
-        //         description
-        //     });
+        if (overallReview) {
+            const detailedFeedback = await validateOverallCodeReview(filteredDiff, {
+                title,
+                description
+            });
         
-        //     if (detailedFeedback && detailedFeedback.length > 0) {
-        //         const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
+            if (detailedFeedback && detailedFeedback.length > 0) {
+                const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
         
-        //         const data = await commentOnPullRequest({
-        //             owner: repository.owner.login,
-        //             repo: repository.name,
-        //             number
-        //         }, resultsFullFeedback);
-
-        //         console.log('Commented on PR with full feedback', data);
-        //     }
-        // }
-    }
-
-    if (overallReview) {
-        const detailedFeedback = await validateOverallCodeReview(filteredDiff, {
-            title,
-            description
-        });
-    
-        if (detailedFeedback && detailedFeedback.length > 0) {
-            const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
-    
-            const data = await commentOnPullRequest({
-                owner: repository.owner.login,
-                repo: repository.name,
-                number
-            }, resultsFullFeedback);
-
-            console.log('Commented on PR with full feedback', data);
+                await commentOnPullRequest({
+                    owner: repository.owner.login,
+                    repo: repository.name,
+                    number
+                }, resultsFullFeedback);
+            }
         }
     }
 
