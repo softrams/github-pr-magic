@@ -91,7 +91,6 @@ export async function obtainFeedback(file: File, chunk: Chunk, details: Details)
          - Provide a detailed feedback of the pull request based on the diff below.
          - Please write the result in Github Markdown Format.
          - Provide the written feedback in the following JSON format: {"feedback": [{"changesOverview": "<changesOverview>", "feedback": "<feedback", "improvements", "<improvements>", "conclusion": "<conclusion>"}]}.
-         
         
         Review the following code diff in the files "${file.to}", and take the pull request title: ${details.title} into account when writing your response.
 
@@ -126,12 +125,11 @@ export async function obtainFeedback(file: File, chunk: Chunk, details: Details)
 }
 
 export async function summaryOfAllFeedback(feedbacks: any[]) {
-    console.log('feedbacks', feedbacks);
     const systemMessage = `
         Your requirement is to merge all the feedbacks into one feedback.
         Instructions below:
          - Please write the result in Github Markdown Format.
-         - Provide the written feedback written as a Github Comment format.
+         - Provide the written feedback as a Github Pull Request Body.
          - Please format each header as a H2 header.
     `
     const message = `
