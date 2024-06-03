@@ -136,29 +136,27 @@ async function main() {
     const { action, repository, number, before, after } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
     const { title, description, patch_url, diff_url } = await PRDetails(repository, number);
 
-    const data = await gitDiff(repository.owner.login, repository.name, number);
+    if (action === "opened") {
+        // Generate a summary of the PR since it's a new PR
+        const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
-    // if (action === "opened") {
-    //     // Generate a summary of the PR since it's a new PR
-    //     const data = await gitDiff(repository.owner.login, repository.name, number);
-    //     dif = data as unknown as string;
-    // } else if (action === "synchronize") {
-    //     const newBaseSha = before;
-    //     const newHeadSha = after;
+    } else if (action === "synchronize") {
+        const newBaseSha = before;
+        const newHeadSha = after;
     
-    //     const data = await compareCommits({
-    //         owner: repository.owner.login,
-    //         repo: repository.name,
-    //         before: newBaseSha,
-    //         after: newHeadSha,
-    //         number
-    //     })
+        const data = await compareCommits({
+            owner: repository.owner.login,
+            repo: repository.name,
+            before: newBaseSha,
+            after: newHeadSha,
+            number
+        })
     
-    //     dif = String(data);
-    // } else {
-    //     console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
-    //     return;
-    // }
+        dif = String(data);
+    } else {
+        console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
+        return;
+    }
 
     if (!dif) {
         // Well shit.
@@ -171,17 +169,6 @@ async function main() {
           minimatch(file.to ?? "", pattern)
         );
     });
-
-    if (reviewCode) {
-        // @ToDo Improve the support for comments, 
-        // IE: Remove outdated comments when code is changed, revalidated if the Pull Request is ready to be approved.
-        const neededComments = await validateCode(filteredDiff, {
-            title,
-            description
-        });
-        console.log('comments', neededComments);
-        // await createReviewComment(repository.owner.login, repository.name, number, neededComments);
-    }
 
     if (action === "opened") {
         if (createPullRequestSummary) {
@@ -209,6 +196,22 @@ async function main() {
                     number
                 }, resultsFullFeedback);
             }
+        }
+    }
+
+    if (reviewCode) {
+        // @TODO Improve the support for comments, 
+        // IE: Remove outdated comments when code is changed, revalidated if the Pull Request is ready to be approved.
+        const neededComments = await validateCode(filteredDiff, {
+            title,
+            description
+        });
+        if (neededComments && neededComments.length > 0) {
+            await createReviewComment(repository.owner.login, repository.name, number, neededComments);
+        } else {
+            // @TODO We need to veirfy if any other comments was created by the AI Bot, if so see if they was updated. 
+            // @TODO If they have been fixed or no reviews are required than we can approve the Pull Request
+            await createReviewComment(repository.owner.login, repository.name, number, neededComments)
         }
     }
 }
