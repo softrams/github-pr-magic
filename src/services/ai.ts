@@ -4,6 +4,7 @@ import { Details } from "..";
 import OpenAI from "openai";
 
 const OPEN_AI_KEY: string = core.getInput("openai_api_key"); 
+const OPEN_AI_MODEL: string = core.getInput("openai_model");
 
 const openai = new OpenAI({
     apiKey: OPEN_AI_KEY,
@@ -13,10 +14,9 @@ export async function createMessage(file: File, chunk: Chunk, details: Details) 
     const message = `
         Your requirement is to review pull request.
         Instructions below:
-         - Provide response in the Following JSON format: {"reviews": [{"lineNumber":  <line_number>, "review": "<review comment>", "required_changed": "<true or false>"}]}.
+         - Provide response in the Following JSON format: {"reviews": [{"lineNumber":  <line_number>, "review": "<review comment>"}]}.
          - Do not give positive comments or compliments.
          - Provide comments and suggestions IF there is something to improve, otherwise "reviews" should be a empty array of reviews.
-         - If you want to request changes that should be required, set "required_changed" to true.
          - REQUIRED: Do not suggest adding comments to the code.
          - REQUIRED: Do not suggest adding a new line at the end of a file.
          - Please write comment in Github Markdown Format.
@@ -68,7 +68,7 @@ export async function prSummaryCreation(file: File, chunk: Chunk, details: Detai
     `
 
     const response = await openai.chat.completions.create({
-        model: "gpt-4-1106-preview",
+        model: OPEN_AI_MODEL,
         response_format: {
             type: "json_object",
         },
@@ -81,7 +81,6 @@ export async function prSummaryCreation(file: File, chunk: Chunk, details: Detai
     });
 
     const resss = response.choices[0].message?.content?.trim() || "{}";
-    // console.log('resss', JSON.parse(resss));
     return JSON.parse(resss).summary; 
 }
 
@@ -110,7 +109,7 @@ export async function obtainFeedback(file: File, chunk: Chunk, details: Details)
     `
 
     const response = await openai.chat.completions.create({
-        model: "gpt-4-1106-preview",
+        model: OPEN_AI_MODEL,
         response_format: {
             type: "json_object",
         },
@@ -144,7 +143,7 @@ export async function summaryOfAllFeedback(feedbacks: any[]) {
     `
 
     const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: OPEN_AI_MODEL,
         messages: [
             {
                 role: "system",
@@ -173,7 +172,7 @@ export async function summaryAllMessages(summaries: any[]) {
     `
 
     const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: OPEN_AI_MODEL,
         messages: [
             {
                 role: "system",
@@ -195,7 +194,7 @@ export async function validateCodeViaAI(file: File, chunk: Chunk, details: Detai
     try {
         const message = await createMessage(file, chunk, details);
         const response = await openai.chat.completions.create({
-            model: "gpt-4-1106-preview",
+            model: OPEN_AI_MODEL,
             response_format: {
                 type: "json_object",
             },
@@ -213,10 +212,4 @@ export async function validateCodeViaAI(file: File, chunk: Chunk, details: Detai
     } catch (error) {
         console.log('validateCodeViaAI error', error)
     }
-
-
-
-    // const response = await aiService(message);
-    // console.log('response', response);
-    // return response;
 }

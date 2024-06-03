@@ -25,8 +25,6 @@ export async function PRDetails(repository: any, number: number) {
     pull_number: number,
   });
 
-  // console.log('data', data);
-
   return {
     title: data.title || "",
     description: data.body || "",
@@ -36,19 +34,19 @@ export async function PRDetails(repository: any, number: number) {
 }
 
 export async function commentOnPullRequest(event: Event, body: string) {
-  const regexForReplacing = /```markdown(.*?)```/gms;
-  const {data}  = await octokit.rest.issues.createComment({
+  const regexForReplacing = /```(.*?)```/gms;
+  const { data }  = await octokit.rest.issues.createComment({
     owner: event.owner,
     repo: event.repo,
     issue_number: event.number,
     body: body.replace(regexForReplacing, ""),
   });
 
-  console.log('commentOnPullRequest', data);
+  return data;
 }
 
 export async function updateBody(owner: string, repo: string, pull_number: number, body: string) {
-  const regexForReplacing = /```markdown(.*?)```/gms;
+  const regexForReplacing = /```(.*?)```/gms;
   try {
     const { data } = await octokit.pulls.update({
       owner,
@@ -56,7 +54,7 @@ export async function updateBody(owner: string, repo: string, pull_number: numbe
       pull_number,
       body: body.replace(regexForReplacing, ""),
     });
-    console.log('updateBody', data);
+    return data;
   } catch (error) {
     console.log('updateBody error', error);
   }

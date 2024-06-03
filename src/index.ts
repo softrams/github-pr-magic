@@ -3,7 +3,7 @@ import parseDiff, { File } from "parse-diff"
 import * as core from "@actions/core"
 
 import { commentOnPullRequest, compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
-import { filter, minimatch } from "minimatch";
+import { minimatch } from "minimatch";
 import { obtainFeedback, prSummaryCreation, summaryAllMessages, summaryOfAllFeedback, validateCodeViaAI } from "./services/ai";
 
 
@@ -132,7 +132,6 @@ async function main() {
     const { title, description, patch_url, diff_url } = await PRDetails(repository, number);
 
     if (action === "opened") {
-        // Generate a summary of the PR since it's a new PR
         const data = await gitDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
     } else if (action === "synchronize") {
@@ -154,7 +153,7 @@ async function main() {
     }
 
     if (!dif) {
-        // Well shit.
+        console.log('No diff found, exiting')
         return;
     }
 
@@ -185,27 +184,26 @@ async function main() {
             if (detailedFeedback && detailedFeedback.length > 0) {
                 const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
         
-                await commentOnPullRequest({
+                const data = await commentOnPullRequest({
                     owner: repository.owner.login,
                     repo: repository.name,
                     number
                 }, resultsFullFeedback);
+
+                console.log('Commented on PR with full feedback', data);
             }
         }
     }
 
     if (reviewCode) {
-        // @TODO Improve the support for comments, 
-        // IE: Remove outdated comments when code is changed, revalidated if the Pull Request is ready to be approved.
         const neededComments = await validateCode(filteredDiff, {
             title,
             description
         });
+
         if (neededComments && neededComments.length > 0) {
             await createReviewComment(repository.owner.login, repository.name, number, neededComments);
         } else {
-            // @TODO We need to veirfy if any other comments was created by the AI Bot, if so see if they was updated. 
-            // @TODO If they have been fixed or no reviews are required than we can approve the Pull Request
             await createReviewComment(repository.owner.login, repository.name, number, neededComments)
         }
     }
