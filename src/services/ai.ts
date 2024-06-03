@@ -18,6 +18,7 @@ export async function createMessage(file: File, chunk: Chunk, details: Details) 
          - Provide comments and suggestions IF there is something to improve, otherwise "reviews" should be a empty array of reviews.
          - If you want to request changes that should be required, set "required_changed" to true.
          - REQUIRED: Do not suggest adding comments to the code.
+         - REQUIRED: Do not suggest adding a new line at the end of a file.
          - Please write comment in Github Markdown Format.
          - Use the given pr description only for the overall context
         
