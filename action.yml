@@ -8,7 +8,7 @@ inputs:
   excluded_files:
     description: 'Files to exclude from review'
     required: false
-    default: 'node_modules, package-lock.json, yarn.lock'
+    default: "node_modules, package-lock.json, yarn.lock"
   openai_api_key:
     description: 'OpenAI API key'
     required: true

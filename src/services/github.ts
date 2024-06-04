@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
-import * as core from "@actions/core"
-import { RequestError } from '@octokit/types';
+import * as core from "@actions/core";
+
 const GITHUB_TOKEN: string = core.getInput("github_token");
 
 const octokit = new Octokit({
@@ -15,6 +15,8 @@ export interface Event {
   before?: string;
   after?: string;
 }
+
+const regexForReplacing = /```(.*?)```/gms;
 
 
 export async function PRDetails(repository: any, number: number) {
@@ -34,43 +36,51 @@ export async function PRDetails(repository: any, number: number) {
 }
 
 export async function commentOnPullRequest(event: Event, body: string) {
-  const regexForReplacing = /```(.*?)```/gms;
-  const { data }  = await octokit.rest.issues.createComment({
-    owner: event.owner,
-    repo: event.repo,
-    issue_number: event.number,
-    body: body.replace(regexForReplacing, ""),
-  });
-
-  return data;
+  const bodyWithoutMarkdown = body.replace(regexForReplacing, "");
+  try {
+    const { data }  = await octokit.rest.issues.createComment({
+      owner: event.owner,
+      repo: event.repo,
+      issue_number: event.number,
+      body: bodyWithoutMarkdown,
+    });
+  
+    return data;
+  } catch (error) {
+    console.debug('commentOnPullRequest error', error);
+  }
 }
 
 export async function updateBody(owner: string, repo: string, pull_number: number, body: string) {
-  const regexForReplacing = /```(.*?)```/gms;
+  const bodyWithoutMarkdown = body.replace(regexForReplacing, "");
   try {
     const { data } = await octokit.pulls.update({
       owner,
       repo,
       pull_number,
-      body: body.replace(regexForReplacing, ""),
+      body: bodyWithoutMarkdown,
     });
     return data;
   } catch (error) {
-    console.log('updateBody error', error);
+    console.debug('updateBody error', error);
   }
 }
 
 
-export async function gitDiff(owner: string, repo: string, pull_number: number) {
-  // Obtain the PR details
-  const { data } = await octokit.pulls.get({
-    owner,
-    repo,
-    pull_number,
-    mediaType: { format: "diff" },
-  });
+export async function getPullRequestDiff(owner: string, repo: string, pull_number: number) {
+  try {
+    // Obtain the PR details
+    const { data } = await octokit.pulls.get({
+      owner,
+      repo,
+      pull_number,
+      mediaType: { format: "diff" },
+    });
 
-  return data;
+    return data;
+  } catch (error) {
+    console.debug('gitDiff error', error);
+  }
 }
 
 
@@ -95,28 +105,24 @@ export async function createReviewComment(owner: string, repo: string, pull_numb
     }); 
     return data;
   } catch (error) {
-    console.log('basicError', error);
-    const newError = error as RequestError;
-    if (newError.errors) {
-      for (let index = 0; index < newError.errors.length; index++) {
-        const error = newError.errors[index];
-        console.log('createReviewComment error loops', error);
-      }
-    }
-    console.log('createReviewComment error', newError);
+    console.debug('basicError', error);
   }
 }
 
 export async function compareCommits(event: Event) {
-  const { data } = await octokit.repos.compareCommits({
-    headers: {
-      accept: "application/vnd.github.v3.diff",
-    },
-    owner: event.owner,
-    repo: event.repo,
-    base: event.before || "",
-    head: event.after || "",
-  });
-
-  return data;
+  try {
+    const { data } = await octokit.repos.compareCommits({
+      headers: {
+        accept: "application/vnd.github.v3.diff",
+      },
+      owner: event.owner,
+      repo: event.repo,
+      base: event.before || "",
+      head: event.after || "",
+    });
+  
+    return data; 
+  } catch (error) {
+    console.debug('compareCommits error', error);
+  }
 }

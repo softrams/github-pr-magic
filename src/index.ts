@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import parseDiff, { File } from "parse-diff"
 import * as core from "@actions/core"
 
-import { commentOnPullRequest, compareCommits, createReviewComment, gitDiff, PRDetails, updateBody } from "./services/github";
+import { commentOnPullRequest, compareCommits, createReviewComment, getPullRequestDiff, PRDetails, updateBody } from "./services/github";
 import { minimatch } from "minimatch";
 import { obtainFeedback, prSummaryCreation, summaryAllMessages, summaryOfAllFeedback, validateCodeViaAI } from "./services/ai";
 
@@ -52,9 +52,8 @@ async function validatePullRequest(diff: File[], details: Details) {
 
 
     if (foundSummary && foundSummary.length > 0) {
-         const bodyIdea = await summaryAllMessages(foundSummary);
-         console.log('Summary of all messages', bodyIdea);
-        return bodyIdea;
+        const compiledSummary = await summaryAllMessages(foundSummary);
+        return compiledSummary;
     }
 
     return '';
@@ -83,7 +82,7 @@ async function validateCode(diff: File[], details: Details) {
                     return {
                         body: result.review,
                         path: file.to,
-                        line: Number(result.lineNumber)
+                        line: parseInt(result.lineNumber, 10)
                     };
                 });
 
@@ -130,28 +129,27 @@ async function validateOverallCodeReview(diff: File[], details: Details) {
 async function main() {
     let dif: string | null = null;
     const { action, repository, number, before, after } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf-8"))
-    const { title, description, patch_url, diff_url } = await PRDetails(repository, number);
-    const data = await gitDiff(repository.owner.login, repository.name, number);
+    const { title, description } = await PRDetails(repository, number);
+    if (action === "opened" || action === "reopened") {
+        const data = await getPullRequestDiff(repository.owner.login, repository.name, number);
         dif = data as unknown as string;
-    // if (action === "opened") {
-        
-    // } else if (action === "synchronize") {
-    //     const newBaseSha = before;
-    //     const newHeadSha = after;
+    } else if (action === "synchronize") {
+        const newBaseSha = before;
+        const newHeadSha = after;
     
-    //     const data = await compareCommits({
-    //         owner: repository.owner.login,
-    //         repo: repository.name,
-    //         before: newBaseSha,
-    //         after: newHeadSha,
-    //         number
-    //     })
+        const data = await compareCommits({
+            owner: repository.owner.login,
+            repo: repository.name,
+            before: newBaseSha,
+            after: newHeadSha,
+            number
+        })
     
-    //     dif = String(data);
-    // } else {
-    //     console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
-    //     return;
-    // }
+        dif = String(data);
+    } else {
+        console.log('Unknown action', process.env.GITHUB_EVENT_NAME);
+        return;
+    }
 
     if (!dif) {
         console.log('No diff found, exiting')
@@ -173,7 +171,9 @@ async function main() {
                 description
             });
 
-            await updateBody(repository.owner.login, repository.name, number, summary)
+            if (summary) {
+                await updateBody(repository.owner.login, repository.name, number, summary);
+            }
         }
 
         if (overallReview) {
@@ -184,12 +184,13 @@ async function main() {
         
             if (detailedFeedback && detailedFeedback.length > 0) {
                 const resultsFullFeedback = await summaryOfAllFeedback(detailedFeedback);
-        
-                await commentOnPullRequest({
-                    owner: repository.owner.login,
-                    repo: repository.name,
-                    number
-                }, resultsFullFeedback);
+                if (resultsFullFeedback) {
+                    await commentOnPullRequest({
+                        owner: repository.owner.login,
+                        repo: repository.name,
+                        number
+                    }, resultsFullFeedback);
+                }
             }
         }
     }
@@ -200,10 +201,8 @@ async function main() {
             description
         });
 
-        if (neededComments && neededComments.length > 0) {
+        if (neededComments) {
             await createReviewComment(repository.owner.login, repository.name, number, neededComments);
-        } else {
-            await createReviewComment(repository.owner.login, repository.name, number, neededComments)
         }
     }
 }
