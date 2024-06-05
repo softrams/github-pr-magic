@@ -24,4 +24,4 @@ jobs:
               openai_api_key: ${{ secrets.OPEN_AI_KEY }}
               openai_model: "gpt-4o"
               review_code: true
-              excluded_files: "node_modules, package.json, package-lock.json"
+              excluded_files: "node_modules, package.json, package-lock.json, lib"
