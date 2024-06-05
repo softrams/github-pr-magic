@@ -10,13 +10,18 @@ jobs:
         steps:
           - name: Checkout code
             uses: actions/checkout@v2
-          - name: Set up Node
-            uses: actions/setup-node@v2
+          - uses: actions/setup-node@v4
+            with:
+              node-version: 18
+          - name: Install dependencies
+            run: npm install
+          - name: Build Code
+            run: npm run build
           - name: Run Custom Action
             uses: ./
             with:
-              github-token: ${{ secrets.GITHUB_TOKEN }}
-              pr-number: ${{ github.event.number }}
-              openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-              openai_model: 'gpt-4'
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              openai_api_key: ${{ secrets.OPEN_AI_KEY }}
+              openai_model: "gpt-4o"
               review_code: true
+              excluded_files: "node_modules, package.json, package-lock.json"
