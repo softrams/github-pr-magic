@@ -1,23 +1,23 @@
-name: 'Github PR Magic'
-description: 'Automatically reviewing and approving PRs'
+name: 'Pull Request Magic'
+description: 'Pull Request Magic enables you to streamline your workflow by automating Pull Request Reviews, crafting Pull Request Descriptions, and even auto-approving Pull Requests—all seamlessly integrated with Github Actions. '
 author: 'Darrell Richards'
 inputs:
   github_token:
-    description: 'Github token'
+    description: 'Github Token for PR approval and code review.'
     required: true
   excluded_files:
-    description: 'Files to exclude from review'
+    description: 'A comma separated list of files to exclude from code review.'
     required: false
     default: "node_modules, package-lock.json, yarn.lock"
   openai_api_key:
-    description: 'OpenAI API key'
+    description: 'OpenAI API Key for code review and approval.'
     required: true
   openai_model:
-    description: 'OpenAI model to use (e.g., gpt-4, davinci)'
+    description: 'OpenAI model to use (e.g., gpt-4, davinci).'
     required: false
     default: 'gpt-4'
   review_code:
-    description: 'Review code'
+    description: 'Provides code review as a comment line by line.'
     required: false
     default: true
   generate_summary:
@@ -25,7 +25,7 @@ inputs:
     required: false
     default: false
   overall_code_review:
-    description: 'Overall code review as a comment'
+    description: 'Provides overall code review as a comment (Overview, Updates and Enhancements, Recommendations).'
     required: false
     default: false
 runs:
