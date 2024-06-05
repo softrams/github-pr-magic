@@ -163,7 +163,7 @@ async function main() {
         );
     });
 
-    if (action === "opened") {
+    if (action === "opened" || action === "reopened") {
         if (createPullRequestSummary) {
             console.log('Generating summary for new PR');
             const summary = await validatePullRequest(diff, {
@@ -207,4 +207,7 @@ async function main() {
     }
 }
 
-main();
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
