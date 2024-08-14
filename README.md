@@ -27,12 +27,9 @@ name: AI Code Reviewer
 on: 
     pull_request:
         types:
-            [
-                opened,
-                reopened, 
-                synchronize
-            ]
-
+          - opened
+          - reopened 
+          - synchronize
 jobs: 
     code_review:
         runs-on: ubuntu-latest
